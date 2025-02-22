@@ -20,6 +20,26 @@ const nextConfig = {
         protocol: "https",
         hostname: "firebasestorage.googleapis.com",
       },
+      {
+        protocol: "https",
+        hostname: "images.unsplash.com",
+      },
+      {
+        protocol: "https",
+        hostname: "img.shopcider.com",
+      },
+      {
+        protocol: "https",
+        hostname: "images.shopcider.com",
+      },
+      {
+        protocol: "https",
+        hostname: "photos-us.bazaarvoice.com",
+      },
+      {
+        protocol: "https",
+        hostname: "r-ap.rtrcdn.com",
+      }
     ],
     dangerouslyAllowSVG: true,
     contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",

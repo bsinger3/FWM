@@ -1,47 +1,97 @@
-import Link from "next/link";
+'use client';
+
+import React from 'react';
+import { Friend, SearchFilters } from '@/lib/types';
+import FriendCard from '@/components/FriendCard';
+import SearchBar from '@/components/SearchBar';
+import { Loader2 } from 'lucide-react';
+
+// Fisher-Yates shuffle algorithm
+function shuffleArray<T>(array: T[]): T[] {
+  const shuffled = [...array];
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
+  return shuffled;
+}
 
 export default function Home() {
+  const [allFriends, setAllFriends] = React.useState<Friend[]>([]);
+  const [filteredFriends, setFilteredFriends] = React.useState<Friend[]>([]);
+  const [isLoading, setIsLoading] = React.useState(true);
+  const [error, setError] = React.useState<string | null>(null);
+
+  React.useEffect(() => {
+    fetch('/api/friends/csv')
+      .then(res => {
+        if (!res.ok) throw new Error('Failed to fetch data');
+        return res.json();
+      })
+      .then((data: Friend[]) => {
+        if (!Array.isArray(data) || data.length === 0) {
+          throw new Error('No valid data found');
+        }
+        const shuffled = shuffleArray(data);
+        setAllFriends(shuffled);
+        setFilteredFriends(shuffled);
+        setError(null);
+      })
+      .catch(error => {
+        console.error('Error fetching friends:', error);
+        setError(error.message);
+      })
+      .finally(() => {
+        setIsLoading(false);
+      });
+  }, []);
+
+  const handleSearch = (filters: SearchFilters) => {
+    const tolerance = filters.tolerance || 2;
+    
+    const filtered = allFriends.filter(friend => {
+      const heightMatch = Math.abs(friend.measurements.height - filters.height) <= tolerance;
+      const bustMatch = Math.abs(friend.measurements.bust - filters.bust) <= tolerance;
+      const waistMatch = Math.abs(friend.measurements.waist - filters.waist) <= tolerance;
+      const hipsMatch = Math.abs(friend.measurements.hips - filters.hips) <= tolerance;
+      
+      return heightMatch && bustMatch && waistMatch && hipsMatch;
+    });
+    
+    setFilteredFriends(filtered);
+  };
+
   return (
-    <main className="flex min-h-screen flex-col items-center justify-between p-8">
-      <div>
-        <h2 className="text-2xl font-semibold text-center border p-4 font-mono rounded-md">
-          Get started by choosing a template path from the /paths/ folder.
-        </h2>
-      </div>
-      <div>
-        <h1 className="text-6xl font-bold text-center">Make anything you imagine 🪄</h1>
-        <h2 className="text-2xl text-center font-light text-gray-500 pt-4">
-          This whole page will be replaced when you run your template path.
-        </h2>
-      </div>
-      <div className="w-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="border rounded-lg p-6 hover:bg-gray-100 transition-colors">
-          <h3 className="text-xl font-semibold">AI Chat App</h3>
-          <p className="mt-2 text-sm text-gray-600">
-            An intelligent conversational app powered by AI models, featuring real-time responses
-            and seamless integration with Next.js and various AI providers.
-          </p>
-        </div>
-        <div className="border rounded-lg p-6 hover:bg-gray-100 transition-colors">
-          <h3 className="text-xl font-semibold">AI Image Generation App</h3>
-          <p className="mt-2 text-sm text-gray-600">
-            Create images from text prompts using AI, powered by the Replicate API and Next.js.
-          </p>
-        </div>
-        <div className="border rounded-lg p-6 hover:bg-gray-100 transition-colors">
-          <h3 className="text-xl font-semibold">Social Media App</h3>
-          <p className="mt-2 text-sm text-gray-600">
-            A feature-rich social platform with user profiles, posts, and interactions using
-            Firebase and Next.js.
-          </p>
-        </div>
-        <div className="border rounded-lg p-6 hover:bg-gray-100 transition-colors">
-          <h3 className="text-xl font-semibold">Voice Notes App</h3>
-          <p className="mt-2 text-sm text-gray-600">
-            A voice-based note-taking app with real-time transcription using Deepgram API, 
-            Firebase integration for storage, and a clean, simple interface built with Next.js.
-          </p>
-        </div>
+    <main className="min-h-screen bg-gray-50">
+      <SearchBar onSearch={handleSearch} />
+      <div className="container mx-auto px-4 py-4">
+        {isLoading ? (
+          <div className="flex flex-col items-center justify-center min-h-[50vh]">
+            <Loader2 className="w-8 h-8 animate-spin text-blue-500" />
+            <p className="mt-4 text-gray-600">Loading size references...</p>
+          </div>
+        ) : error ? (
+          <div className="text-center text-red-600 py-8">
+            <p>Error: {error}</p>
+            <button 
+              onClick={() => window.location.reload()} 
+              className="mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+            >
+              Try Again
+            </button>
+          </div>
+        ) : (
+          <>
+            <p className="text-center text-gray-600 mb-4">
+              Found {filteredFriends.length} matches out of {allFriends.length} total references
+            </p>
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+              {filteredFriends.map((friend) => (
+                <FriendCard key={friend.id} friend={friend} />
+              ))}
+            </div>
+          </>
+        )}
       </div>
     </main>
   );
