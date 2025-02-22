@@ -1,15 +1,41 @@
-# Ansh & Riley Full-Stack Template
+# Size Reference App
 
-This is a full-stack template project for Software Composers to create  applications with AI.
+A web application that helps users find clothing size references by matching measurements. Built with Next.js, React, and TypeScript.
 
-## Getting started
-To create a new project, you go to `/paths`, choose from our list of Paths, and then use Cursor's Composer feature to quickly scaffold your project!
+## Features
 
-You can also edit the Path's prompt template to be whatever you like!
+- Interactive measurement input with visual dress form
+- Real-time size matching
+- Links to actual clothing items
+- Responsive design
+- CSV data processing for size references
 
-## Technologies used
-This doesn't really matter, but is useful for the AI to understand more about this project. We are using the following technologies
-- React with Next.js 14 App Router
-- TailwindCSS
-- Firebase Auth, Storage, and Database
-- Multiple AI endpoints including OpenAI, Anthropic, and Replicate using Vercel's AI SDK
+## Tech Stack
+
+- Next.js 14
+- React
+- TypeScript
+- Tailwind CSS
+- CSV parsing for data management
+
+## Getting Started
+
+1. Clone the repository
+2. Install dependencies:
+   ```bash
+   npm install
+   ```
+3. Run the development server:
+   ```bash
+   npm run dev
+   ```
+4. Open [http://localhost:3000](http://localhost:3000) in your browser
+
+## Data Management
+
+The app uses CSV data to store and process size references. The data includes:
+- Height measurements
+- Bust measurements
+- Waist measurements
+- Hip measurements
+- Links to clothing items
